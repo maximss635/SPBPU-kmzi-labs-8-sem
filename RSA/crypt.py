@@ -8,8 +8,9 @@ def main(context):
     open_text = from_file(context.path_in, os.path.getsize(context.path_in))
 
     if len(open_text) % 16 != 0:
-        print('Padding: {} bytes'.format(len(open_text) % 16))
-        open_text = open_text + (b'0' * (len(open_text) % 16))
+        padding = 16 - (len(open_text) % 16)
+        print('Padding: {} bytes of \'0\''.format(padding))
+        open_text = open_text + (b'0' * padding)
 
     cipher_instance = AES.new(key, AES.MODE_CBC, iv=b'0000000000000000')
     cipher_text = cipher_instance.encrypt(open_text)
@@ -25,7 +26,7 @@ def main(context):
 
     print('Header: {}'.format(header))
 
-    path_out = context.path_in.replace('.in', '.out')
+    path_out = context.path_in + '.crypted'
     f = open(path_out, 'wb')
     f.write(header)
     f.write(cipher_text)

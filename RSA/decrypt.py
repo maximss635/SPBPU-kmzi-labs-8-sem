@@ -22,7 +22,7 @@ def main(context):
     cipher_instance = AES.new(key, AES.MODE_CBC, iv=b'0000000000000000')
     decrypted_text = cipher_instance.decrypt(cipher_text)
 
-    path_out = context.path_in.replace('.out', '.out.decrypted')
+    path_out = context.path_in + '.decrypted'
     f = open(path_out, 'wb')
     f.write(decrypted_text)
     f.close()

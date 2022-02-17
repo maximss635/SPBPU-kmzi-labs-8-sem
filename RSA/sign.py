@@ -18,7 +18,7 @@ def main(context):
     print('Sign: {}'.format(s))
 
     s = s.to_bytes(64, byteorder='big')
-    path_sign = context.path_in.replace('.in', '.sign')
+    path_sign = context.path_in + '.sign'
     f = open(path_sign, 'wb')
     f.write(s)
     f.close()
