@@ -19,12 +19,13 @@ def main(context):
     e, n = parse_rsa_key(context.rsa_key, is_public=True)
 
     cipher_key = pow(key, e, n)
-    cipher_key = cipher_key.to_bytes(length=64, byteorder='big')
+    cipher_key = cipher_key.to_bytes(RSA_KEY_LEN//8, byteorder='big')
 
-    l, type = 64, 31
+    l, type = RSA_KEY_LEN // 8, 31
     header = type.to_bytes(1, 'big') + l.to_bytes(1, 'big') + cipher_key
 
     print('Header: {}'.format(header))
+    print('Size header: {}'.format(len(header)))
 
     path_out = context.path_in + '.crypted'
     f = open(path_out, 'wb')

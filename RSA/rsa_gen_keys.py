@@ -1,17 +1,19 @@
-import rsa
-import argparse
+from common import *
 
 
 def main(context):
-    (public_key, private_key) = rsa.newkeys(512)
+    private_key = RSA.generate(RSA_KEY_LEN)
 
     print('p = {}'.format(private_key.p))
     print('q = {}'.format(private_key.q))
+    print('N = {}'.format(private_key.n))
+    print('e = {}'.format(private_key.e))
+    print('d = {}'.format(private_key.d))
 
     f = open(context.path_out_public, 'w')
-    f.write('e = {}'.format(public_key.e))
+    f.write('e = {}'.format(private_key.e))
     f.write('\n')
-    f.write('n = {}'.format(public_key.n))
+    f.write('n = {}'.format(private_key.n))
     f.close()
 
     f = open(context.path_out_private, 'w')

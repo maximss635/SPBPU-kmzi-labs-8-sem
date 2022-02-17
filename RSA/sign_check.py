@@ -4,7 +4,7 @@ from common import *
 
 
 def main(context):
-    s = from_file(context.path_sign, 64)
+    s = from_file(context.path_sign, RSA_KEY_LEN//8)
     s = int.from_bytes(s, byteorder='big')
 
     # print('Sign: {}'.format(s))

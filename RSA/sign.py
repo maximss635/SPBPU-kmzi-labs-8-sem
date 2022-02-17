@@ -17,7 +17,7 @@ def main(context):
 
     print('Sign: {}'.format(s))
 
-    s = s.to_bytes(64, byteorder='big')
+    s = s.to_bytes(RSA_KEY_LEN//8, byteorder='big')
     path_sign = context.path_in + '.sign'
     f = open(path_sign, 'wb')
     f.write(s)

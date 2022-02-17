@@ -1,5 +1,6 @@
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
+from Crypto.PublicKey import RSA
 
 from sys import argv
 
@@ -7,6 +8,9 @@ import random
 import argparse
 import os
 import math
+
+
+RSA_KEY_LEN = 1024
 
 
 def from_file(path, n):
