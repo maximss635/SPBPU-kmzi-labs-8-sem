@@ -1,6 +1,6 @@
 import random
 import math
-
+import rsa
 from rsa.common import inverse
 
 
@@ -50,3 +50,45 @@ class AttackCommonModule:
         print('[Attack] d = {}'.format(d))
 
         return p, q, d
+
+
+class VinerAttack:
+    def __call__(self, public_key):
+        """
+        :return:    private_key.d
+        """
+
+        m = 100
+        print('[Attack] m = {}'.format(m))
+
+        c = pow(m, public_key.e, public_key.n)
+        print('[Attack] m^e (mod n) = {}'.format(c))
+
+        frac = self.__to_continued_fraction(public_key.e, public_key.n)
+        print('[Attack] e/n = {}'.format(frac))
+
+        Q_, Q__, P_, P__ = 0, 1, 1, 0
+        for a in frac:
+            print('[Attack] a = {}'.format(a))
+            P = a * P_ + P__
+            Q = a * Q_ + Q__
+            P__, Q__ = P_, Q_
+            P_, Q_ = P, Q
+
+            if pow(c, Q, public_key.n) == m:
+                return Q
+
+        return None
+
+    @staticmethod
+    def __to_continued_fraction(a, b):
+        a, q = divmod(a, b)
+        t, res = b, [a]
+
+        while q != 0:
+            next_t = q
+            a, q = divmod(t, q)
+            t = next_t
+            res.append(a)
+
+        return res

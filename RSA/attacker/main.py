@@ -1,5 +1,6 @@
 import rsa
 import rsa.common
+import argparse
 from attacks import *
 
 
@@ -27,7 +28,8 @@ def generate_keys_with_common_n(bits):
     return private_key_1, private_key_2
 
 
-def main():
+def try_attack_1():
+    print('a')
     private_key_1, private_key_2 = generate_keys_with_common_n(1024)
 
     attack = AttackCommonModule(private_key_1.n, private_key_1.e, private_key_1.d)
@@ -40,5 +42,33 @@ def main():
         print('Атака прошла безуспешно')
 
 
+def try_attack_2():
+    public_key, private_key = rsa.newkeys(128)
+    # public_key = rsa.PublicKey(793097, 678271)
+    # private_key = rsa.PrivateKey(793097, 678271, 7, 863, 919)
+
+    print('Ключ:')
+    print('p = {}'.format(private_key.p))
+    print('q = {}'.format(private_key.q))
+    print('n = {}'.format(private_key.n))
+    print('e = {}'.format(private_key.e))
+    print('d = {}'.format(private_key.d))
+
+    attack = VinerAttack()
+    private_key_attacked = attack(public_key)
+
+    if private_key.d == private_key_attacked:
+        print('Атака прошла успешно')
+    else:
+        print('Атака прошла безуспешно')
+
+
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--attack', required=True)
+    args = parser.parse_args()
+
+    if args.attack == '1':
+        try_attack_1()
+    elif args.attack == '2':
+        try_attack_2()
