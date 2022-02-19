@@ -54,13 +54,40 @@ def try_attack_2():
     print('e = {}'.format(private_key.e))
     print('d = {}'.format(private_key.d))
 
-    attack = VinerAttack()
+    attack = AttackViner()
     private_key_attacked = attack(public_key)
 
     if private_key.d == private_key_attacked:
         print('Атака прошла успешно')
     else:
         print('Атака прошла безуспешно')
+
+
+def try_attack_3():
+    # public_key, private_key = rsa.newkeys(64, exponent=50)
+    public_key = rsa.PublicKey(793097, 678271)
+    private_key = rsa.PrivateKey(793097, 678271, 7, 863, 919)
+
+    print('Ключ:')
+    print('p = {}'.format(private_key.p))
+    print('q = {}'.format(private_key.q))
+    print('n = {}'.format(private_key.n))
+    print('e = {}'.format(private_key.e))
+    print('d = {}\n'.format(private_key.d))
+
+    m = random.randint(0, public_key.n)
+    print('Исходное сообщение: {}\n'.format(m))
+
+    c = pow(m, public_key.e, public_key.n)
+    print('Шифртекст: {}'.format(c))
+
+    attack = AttackKeyLessDecrypt(logs=True)
+    m_attacked = attack(public_key, c)
+
+    if m_attacked == m:
+        print('Атака прошла успешно')
+    else:
+        print('Атака прошла безуспешно {} {}'.format(m_attacked, m))
 
 
 def generate(bits):
@@ -107,6 +134,8 @@ if __name__ == '__main__':
         try_attack_1()
     elif args.attack == '2':
         try_attack_2()
+    elif args.attack == '3':
+        try_attack_3()
 
     if args.generate:
         generate(int(args.generate))
