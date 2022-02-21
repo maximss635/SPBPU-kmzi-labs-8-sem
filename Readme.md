@@ -2,25 +2,31 @@
 в victim/
 
 генерим ключи
+
 python rsa_gen_keys.py --path-out-private victim/res/rsa_private.key \
        --path-out-public victim/res/rsa_public.key
+
 
 python gen_session_key.py --path-out victim/res/data.key
 
 шифруем файл
+
 python encrypt.py --path-in victim/res/test.txt \
        --rsa-key victim/res/rsa_public.key --data-key victim/res/data.key
 
 расшифровываем
+
 python decrypt.py --path-in victim/res/test.txt.crypted --rsa-key \
        victim/res/rsa_private.key
 
 Расшифрованный должен совпасть с исходным
 
 Подписываем файл
+
 python sign.py --path-in victim/res/test.txt --rsa-key victim/res/rsa_private.key
 
 Проверяем подпись
+
 python sign_check.py --path-in victim/res/test.txt --path-sign \
        victim/res/test.txt.sign --rsa-key victim/res/rsa_public.key
 
@@ -32,11 +38,15 @@ python sign_check.py --path-in victim/res/test.txt --path-sign \
 в attacker/
 
 3 атки:                   
+
 python main.py --attack 1
+
 python main.py --attack 2
+
 python main.py --attack 3
 
 и генерация параметров
+
 python main.py --generate [BIT_SIZE напр. 1024]
 
 ****************************************************
@@ -44,14 +54,17 @@ python main.py --generate [BIT_SIZE напр. 1024]
 3 лаба:
 
 атака в attacker/
+
 python main.py --attack 4
 
 и шифрование в victim/
 шифруем
+
 python encrypt_oaep.py --path-in res/test.txt --rsa-key res/rsa_public.key \
        --data-key res/data.key
 
 и расшифровываем
+
 python decrypt_oaep.py --path-in res/test.txt.crypted --rsa-key \
        res/rsa_private.key
 
