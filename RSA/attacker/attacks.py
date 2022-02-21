@@ -1,6 +1,8 @@
 import random
 import math
-import rsa
+
+from sympy.polys import Poly
+from sympy import symbols
 from rsa.common import inverse
 
 
@@ -88,6 +90,8 @@ class AttackViner:
             P_, Q_ = P, Q
 
             if pow(c, Q, public_key.n) == m:
+                if self.__logs:
+                    print('[Attack] d = {}'.format(Q))
                 return Q
 
         return None
@@ -125,6 +129,72 @@ class AttackKeyLessDecrypt:
             c = pow(c, public_key.e, public_key.n)
 
             if (c - cipher_text) % public_key.n == 0:
+                if self.__logs:
+                    print('[Attack] m = {}'.format(c_pred))
                 return c_pred
 
         return None
+
+
+class AttackTwoAffineMessages:
+    def __init__(self, a, b, logs=True):
+        self.__a = a
+        self.__b = b
+        self.__logs = logs
+
+    @staticmethod
+    def __poly_normalize(poly, n, z):
+        new_coeffs = []
+        hight_coeff = poly.coeffs()[0]
+        for c in poly.coeffs():
+            x = 0
+            while c % n != (x * hight_coeff) % n:
+                x += 1
+            # while c % hight_coeff != 0:
+                # c += n
+            new_coeffs.append(x)
+
+        return Poly(new_coeffs, z)
+
+    def __poly_gcd(self, poly_1, poly_2, public_key, z):
+        while poly_1.degree() != 1 and poly_2.degree() != 1:
+            if poly_2.degree() >= poly_1.degree():
+                poly_2 %= poly_1
+                poly_2 = self.__poly_normalize(poly_2, public_key.n, z)
+            else:
+                poly_1 %= poly_2
+                poly_1 = self.__poly_normalize(poly_1, public_key.n, z)
+            if self.__logs:
+                print('[Attack] poly 1: {}'.format(poly_1))
+                print('[Attack] poly 2: {}'.format(poly_2))
+
+        if poly_1.degree() == 1:
+            return poly_1
+        else:
+            return poly_2
+
+    def __call__(self, public_key, cipher_text_1, cipher_text_2):
+        """
+        :return: open_text_1, open_text_2
+        """
+
+        z = symbols('z', real=True)
+        poly_1 = Poly(z ** public_key.e - cipher_text_1)
+        poly_2 = Poly((self.__a * z + self.__b) ** public_key.e - cipher_text_2)
+
+        if self.__logs:
+            print('[Attack] poly 1: {}'.format(poly_1))
+            print('[Attack] poly 2: {}'.format(poly_2))
+
+        poly_gcd = self.__poly_gcd(poly_1, poly_2, public_key, z)
+        if self.__logs:
+            print('[Attack] poly gcd: {}'.format(poly_gcd))
+
+        m1 = public_key.n - poly_gcd.coeffs()[1]
+        m2 = (m1 * self.__a + self.__b) % public_key.n
+
+        if self.__logs:
+            print('[Attack] m1 = {}'.format(m1))
+            print('[Attack] m2 = {}'.format(m2))
+
+        return m1, m2

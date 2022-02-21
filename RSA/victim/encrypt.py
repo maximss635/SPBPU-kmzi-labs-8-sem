@@ -3,21 +3,13 @@ import os.path
 from common import *
 
 
-def padding_forward(data):
-    padding = AES.block_size - (len(data) % AES.block_size)
-    data = data + (b'0' * padding) + padding.to_bytes(length=AES.block_size, byteorder='big')
-    print('Padding: {} bytes of \'0\''.format(padding))
-
-    return data
-
-
 def main(context):
     key = from_file(context.data_key, 32)
     print('Ключ: {}'.format(int.from_bytes(key, byteorder='big')))
 
     open_text = from_file(context.path_in, os.path.getsize(context.path_in))
     open_text_len = len(open_text)
-    open_text = padding_forward(open_text)
+    open_text = padding_make(open_text)
 
     cipher_instance = AES.new(key, AES.MODE_CBC, iv=b'0000000000000000')
     cipher_text = cipher_instance.encrypt(open_text)

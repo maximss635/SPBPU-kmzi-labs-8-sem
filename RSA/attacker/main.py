@@ -30,7 +30,7 @@ def generate_keys_with_common_n(bits):
 
 
 def try_attack_1():
-    private_key_1, private_key_2 = generate_keys_with_common_n(1024)
+    private_key_1, private_key_2 = generate_keys_with_common_n(2048)
 
     attack = AttackCommonModule(private_key_1.n, private_key_1.e, private_key_1.d)
     p_attacked, q_attacked, d_attacked = attack(private_key_2.e)
@@ -90,6 +90,43 @@ def try_attack_3():
         print('Атака прошла безуспешно {} {}'.format(m_attacked, m))
 
 
+def try_attack_4():
+    a, b = 3, 4
+
+    public_key, private_key = rsa.newkeys(16, exponent=5)
+    # public_key = rsa.PublicKey(81089, 17)
+    # private_key = rsa.PrivateKey(81089, 17, 42533, 131, 619)
+
+    print('Ключ:')
+    print('p = {}'.format(private_key.p))
+    print('q = {}'.format(private_key.q))
+    print('n = {}'.format(private_key.n))
+    print('e = {}'.format(private_key.e))
+    print('d = {}\n'.format(private_key.d))
+
+    m1 = random.randint(0, public_key.n)
+    m2 = (a * m1 + b) % public_key.n
+
+    # m1, m2 = 12345, 12346
+
+    print('Сообщение 1: {}'.format(m1))
+    print('Сообщение 2: {}'.format(m2))
+
+    c1 = pow(m1, public_key.e, public_key.n)
+    c2 = pow(m2, public_key.e, public_key.n)
+
+    print('Шифртекст 1: {}'.format(c1))
+    print('Шифртекст 2: {}'.format(c2))
+
+    attack = AttackTwoAffineMessages(a, b)
+    m1_attacked, m2_attacked = attack(public_key, c1, c2)
+
+    if m1_attacked == m1 and m2_attacked == m2:
+        print('Атака прошла успешно')
+    else:
+        print('Атака прошла безуспешно {}, {} -> {}, {}'.format(m1, m2, m1_attacked, m2_attacked))
+
+
 def generate(bits):
     left = 1 << (bits - 1)
     right = (1 << bits) - 1
@@ -136,6 +173,8 @@ if __name__ == '__main__':
         try_attack_2()
     elif args.attack == '3':
         try_attack_3()
+    elif args.attack == '4':
+        try_attack_4()
 
     if args.generate:
         generate(int(args.generate))
