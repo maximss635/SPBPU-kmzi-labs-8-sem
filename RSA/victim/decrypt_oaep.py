@@ -29,6 +29,11 @@ def decrypt_key(cipher_key, d, n):
     m = X ^ r
 
     print('m = {}'.format(hex(m)))
+
+    mask = (1 << k1) - 1
+    if m & mask:
+        raise Exception('Incorrect ciphertext')
+
     m >>= k1
     print('m = {}'.format(hex(m)))
 

@@ -12,9 +12,7 @@ def crypt_key(key, e, n):
     print('k0 = {}'.format(k0))
     print('k1 = {}'.format(k1))
 
-    print('{}'.format(hex(key)))
     key <<= k1
-    print('{}'.format(hex(key)))
 
     r = random.randbytes(k0 // 8)
     G = SHA512.new()
