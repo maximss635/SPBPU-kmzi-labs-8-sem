@@ -3,32 +3,32 @@
 
 генерим ключи
 
-python rsa_gen_keys.py --path-out-private victim/res/rsa_private.key \
-       --path-out-public victim/res/rsa_public.key
+python rsa_gen_keys.py --path-out-private res/rsa_private.key \
+       --path-out-public res/rsa_public.key
 
 
-python gen_session_key.py --path-out victim/res/data.key
+python gen_session_key.py --path-out res/data.key
 
 шифруем файл
 
-python encrypt.py --path-in victim/res/test.txt \
-       --rsa-key victim/res/rsa_public.key --data-key victim/res/data.key
+python encrypt.py --path-in res/test.txt \
+       --rsa-key res/rsa_public.key --data-key res/data.key
 
 расшифровываем
 
-python decrypt.py --path-in victim/res/test.txt.crypted --rsa-key \
-       victim/res/rsa_private.key
+python decrypt.py --path-in res/test.txt.crypted --rsa-key \
+       res/rsa_private.key
 
 Расшифрованный должен совпасть с исходным
 
 Подписываем файл
 
-python sign.py --path-in victim/res/test.txt --rsa-key victim/res/rsa_private.key
+python sign.py --path-in res/test.txt --rsa-key res/rsa_private.key
 
 Проверяем подпись
 
-python sign_check.py --path-in victim/res/test.txt --path-sign \
-       victim/res/test.txt.sign --rsa-key victim/res/rsa_public.key
+python sign_check.py --path-in res/test.txt --path-sign \
+       res/test.txt.sign --rsa-key res/rsa_public.key
 
 Должна быть надпись что подпись верная
 
