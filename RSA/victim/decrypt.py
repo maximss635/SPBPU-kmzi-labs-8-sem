@@ -4,11 +4,11 @@ from common import *
 def main(context):
     data = from_file(context.path_in, os.path.getsize(context.path_in))
     cipher_key, cipher_text = parse_header(data)
-    cipher_key = int.from_bytes(cipher_key, byteorder='big')
+    # cipher_key = int.from_bytes(cipher_key, byteorder='big')
 
     d, n = parse_rsa_key(context.rsa_key, is_public=False)
     key = pow(cipher_key, d, n)
-    print('Расшифрованный ключ: {}'.format(key))
+    print('Расшифрованный ключ: {}'.format(hex(key)))
 
     key = key.to_bytes(32, byteorder='big')
 

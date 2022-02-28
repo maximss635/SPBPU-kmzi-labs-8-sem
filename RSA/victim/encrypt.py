@@ -5,7 +5,7 @@ from common import *
 
 def main(context):
     key = from_file(context.data_key, 32)
-    print('Ключ: {}'.format(int.from_bytes(key, byteorder='big')))
+    print('Ключ: {}'.format(hex(int.from_bytes(key, byteorder='big'))))
 
     open_text = from_file(context.path_in, os.path.getsize(context.path_in))
     open_text_len = len(open_text)
@@ -18,10 +18,10 @@ def main(context):
     e, n = parse_rsa_key(context.rsa_key, is_public=True)
 
     cipher_key = pow(key, e, n)
+    print('Зашифрованный ключ: {}'.format(hex(cipher_key)))
     cipher_key = cipher_key.to_bytes(RSA_KEY_LEN//8, byteorder='big')
 
-    l, type = RSA_KEY_LEN // 8, 31
-    header = type.to_bytes(1, 'big') + l.to_bytes(1, 'big') + cipher_key
+    header = make_header(cipher_key)
 
     print('Header: {} bytes'.format(len(header)))
 

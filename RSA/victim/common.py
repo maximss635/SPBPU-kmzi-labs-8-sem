@@ -9,6 +9,8 @@ import argparse
 import os
 import math
 
+import asn1
+
 
 RSA_KEY_LEN = 1024
 
@@ -49,7 +51,48 @@ def padding_remove(data):
 
 
 def parse_header(data):
-    type, l = data[0], data[1]
-    assert type == 31
+    decoder = asn1.Decoder()
+    decoder.start(data)
 
-    return data[2: 2 + l], data[2 + l:]
+    decoder.peek()
+    decoder.enter()
+    decoder.peek()
+    decoder.enter()
+    decoder.peek()
+    decoder.enter()
+    decoder.peek()
+    decoder.read()
+    decoder.read()
+    decoder.enter()
+    _, cipher_key = decoder.read()
+
+    return cipher_key, data[160:]
+
+
+def make_header(cipher_key):
+    # l, type = RSA_KEY_LEN // 8, 31
+    # header = type.to_bytes(1, 'big') + l.to_bytes(1, 'big') + cipher_key
+
+    key_len = RSA_KEY_LEN // 8
+    cipher_key = int.from_bytes(cipher_key, byteorder='big')
+
+    encoder = asn1.Encoder()
+    encoder.start()
+
+    encoder.enter(asn1.Numbers.Sequence)
+    encoder.enter(asn1.Numbers.Set)
+    encoder.enter(asn1.Numbers.Sequence)
+    encoder.write(b'\x00\x01', asn1.Numbers.OctetString)   # RSA
+    encoder.write(b'Data', asn1.Numbers.UTF8String)
+    encoder.enter(asn1.Numbers.Sequence)
+    encoder.write(cipher_key, asn1.Numbers.Integer)
+    encoder.leave()
+    encoder.leave()
+    encoder.leave()
+    encoder.write(b'\x01\x32', asn1.Numbers.OctetString)    # 3DES
+    encoder.write(AES.block_size, asn1.Numbers.Integer)
+    encoder.leave()
+
+    header = encoder.output()
+
+    return header
