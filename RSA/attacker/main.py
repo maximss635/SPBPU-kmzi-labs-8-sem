@@ -1,3 +1,4 @@
+import math
 import random
 import rsa.common
 import rsa.prime
@@ -137,26 +138,39 @@ def generate(bits):
         if rsa.prime.is_prime(p):
             break
 
+    sqrt_p = math.sqrt(p)
+    p = 2 * p + 1
+    print('p = {}'.format(p))
+
     # generate q
     while True:
         q = random.randint(left, right)
         if rsa.prime.is_prime(q) and p != q:
             break
 
+    print('q = {}'.format(q))
+
+    sqrt_q = math.sqrt(q)
+    q = 2 * q + 1
+
     n = p * q
     f_n = (p - 1) * (q - 1)
 
-    # generate e
+    print('n = {}'.format(n))
+
     while True:
-        e = random.randint(1, f_n - 1)
-        if math.gcd(e, f_n) == 1:
+        # generate e
+        while True:
+            e = random.randint(1, f_n - 1)
+            if math.gcd(e, f_n) == 1:
+                break
+
+        d = rsa.common.inverse(e, f_n)
+        s = math.sqrt(2) * math.sqrt(sqrt_p) * math.sqrt(sqrt_q)
+
+        if s == math.inf or d > s // 3:
             break
 
-    d = rsa.common.inverse(e, f_n)
-
-    print('p = {}'.format(p))
-    print('q = {}'.format(q))
-    print('n = {}'.format(n))
     print('e = {}'.format(e))
     print('d = {}'.format(d))
 
