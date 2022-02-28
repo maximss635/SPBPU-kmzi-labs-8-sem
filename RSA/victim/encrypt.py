@@ -25,7 +25,7 @@ def main(context):
 
     print('Header: {} bytes'.format(len(header)))
 
-    path_out = context.path_in + '.crypted'
+    path_out = context.path_in + '.encrypted'
     f = open(path_out, 'wb')
     f.write(header)
     f.write(cipher_text)
