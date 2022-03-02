@@ -1,11 +1,7 @@
-import math
-import random
-
-import rsa.common
-
 from elliptic_cryptography import *
 from Crypto.Hash import SHA256
 import argparse
+import rsa.common
 
 
 class SignParams:
@@ -21,51 +17,48 @@ class GostModel:
         self.__sign_params = params
 
     def sign_file(self, path, d):
-        print('!!! SIGN !!!!')
-
         f = open(path, 'rb')
         data = f.read()
         f.close()
 
-        print('q = {}'.format(hex(self.__sign_params.q)))
+        # print('q = {}'.format(hex(self.__sign_params.q)))
 
         hash_instance = SHA256.new(data)
         h = hash_instance.digest()
         h = int.from_bytes(h, byteorder='big')
-        print('h = {}'.format(hex(h)))
+        # print('h = {}'.format(hex(h)))
 
         e = h % self.__sign_params.q
         if e == 0:
             e = 1
-        print('e = {}'.format(hex(e)))
+        # print('e = {}'.format(hex(e)))
 
         while True:
             k = random.randint(1, self.__sign_params.q)
-            print('k = {}'.format(hex(k)))
+            # print('k = {}'.format(hex(k)))
 
             C = self.__sign_params.P * k
             r = C.x % self.__sign_params.q
             if r == 0:
                 continue
 
-            s = (r * self.__sign_params.d + k * e) % self.__sign_params.q
+            s = (r * d + k * e) % self.__sign_params.q
             if s == 0:
                 continue
 
             break
 
-        print('r = {}'.format(hex(r)))
-        print('s = {}'.format(hex(s)))
+        # print('r = {}'.format(hex(r)))
+        # print('s = {}'.format(hex(s)))
 
         return r << 256 | s
 
     def sign_check(self, path, sign, Q):
-        print('!!! CHECK !!!!')
         s = sign & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
         r = sign >> 256
 
-        print('s = {}'.format(hex(s)))
-        print('r = {}'.format(hex(r)))
+        # print('s = {}'.format(hex(s)))
+        # print('r = {}'.format(hex(r)))
 
         check = (0 < r < self.__sign_params.q)
         check &= (0 < s < self.__sign_params.q)
@@ -76,30 +69,30 @@ class GostModel:
         data = f.read()
         f.close()
 
-        hash_instance.update = SHA256.new(data)
+        hash_instance = SHA256.new(data)
         h = hash_instance.digest()
         h = int.from_bytes(h, byteorder='big')
-        print('h = {}'.format(hex(h)))
+        # print('h = {}'.format(hex(h)))
 
         e = h % self.__sign_params.q
         if e == 0:
             e = 1
-        print('e = {}'.format(hex(e)))
+        # print('e = {}'.format(hex(e)))
 
         v = rsa.common.inverse(e, self.__sign_params.q)
-        print('v = {}'.format(hex(v)))
+        # print('v = {}'.format(hex(v)))
 
         z1 = (s * v) % self.__sign_params.q
         z2 = (-r * v) % self.__sign_params.q
 
-        print('z1 = {}'.format(z1))
-        print('z2 = {}'.format(z2))
+        # print('z1 = {}'.format(z1))
+        # print('z2 = {}'.format(z2))
 
         C = self.__sign_params.P * z1 + Q * z2
-        print('C = {}'.format(C))
+        # print('C = {}'.format(C))
 
-        R = C.x % params.q
-        print('R = {}'.format(hex(R)))
+        R = C.x % self.__sign_params.q
+        # print('R = {}'.format(hex(R)))
 
         return r == R
 
@@ -110,7 +103,7 @@ def forward(model, d, context):
 
 
 def backward(model, Q, context, sign):
-    check = model.check_sign(context.path, sign, Q)
+    check = model.sign_check(context.path, sign, Q)
     print('check = {}'.format(check))
 
 
@@ -121,8 +114,8 @@ def main(context):
     d = 5719            # private key
     Q = params.P * d    # public key
 
-    forward(model, d, context)
-    # backward(model, Q, context, )
+    # forward(model, d, context)
+    backward(model, Q, context, 0x3c6dabf5ffd3a7b155623c7c8773229d79746563e9926e05633eb93106862310aa78bf4b42300ab14e1a9f3c6e7dabd53865422be12f0532163b7ecd7a0e580)
 
 
 if __name__ == '__main__':
