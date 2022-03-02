@@ -1,9 +1,6 @@
 import argparse
-import time
-
-import matplotlib.pyplot as plt
 import rsa.prime
-
+import threading
 from elliptic_cryptography import *
 
 
@@ -21,40 +18,41 @@ def prime_generator(n):
             break
 
 
-def algorythm(n, m):
-    print('n = {}'.format(n))
-    print('m = {}'.format(m))
+class Attack(threading.Thread):
+    def __init__(self, n, m, on_done, on_iter):
+        super().__init__()
+        self.__n = n
+        self.__m = m
+        self.__on_done = on_done
+        self.__on_iter = on_iter
 
-    while True:
-        # Генерируем эллиптическую кривую и точку на ней
+    def run(self):
+        if rsa.prime.is_prime(self.__n):
+            return self.__on_done(self.__n, None)
 
-        ec, Q = EllipticCurve.generate_curve_and_point(n)
-        # ec = EllipticCurve(-1, 3231, n)
-        # Q = EllipticCurvePoint(87, 2, ec)
+        print('n = {}'.format(self.__n))
+        print('m = {}'.format(self.__m))
 
-        print('Кривая: {}'.format(ec))
-        print('Точка: Q = {}'.format(Q))
+        while True:
+            # Генерируем эллиптическую кривую и точку на ней
 
-        for i, p in enumerate(prime_generator(m)):
-            a = int(math.log2(n) / math.log2(p) / 2)
+            ec, Q = EllipticCurve.generate_curve_and_point(self.__n)
+            # ec = EllipticCurve(-1, 3231, n)
+            # Q = EllipticCurvePoint(87, 2, ec)
 
-            # print('Q *= {}^{}'.format(p, a))
-            try:
-                for j in range(a):
-                    Q *= p
-            except rsa.common.NotRelativePrimeError as ex:
-                return ex.d
+            self.__on_iter(ec, Q)
+
+            for i, p in enumerate(prime_generator(self.__m)):
+                a = int(math.log2(self.__n) / math.log2(p) / 2)
+                try:
+                    for j in range(a):
+                        Q *= p
+                except rsa.common.NotRelativePrimeError as ex:
+                    self.__on_done(self.__n, ex.d)
+                    return
 
 
-def main(context):
-    n = int(context.number)
-    m = int(context.base)
-
-    if rsa.prime.is_prime(n):
-        print('{} - простое'.format(n))
-        return
-
-    p = algorythm(n, m)
+def report(n, p):
     if (p is not None) and (n % p == 0) and p != n:
         q = n // p
 
@@ -63,6 +61,19 @@ def main(context):
         print('q = {}'.format(q))
     else:
         print('Безуспешно')
+
+
+def iter(ec, Q):
+    print('Кривая: {}'.format(ec))
+    print('Точка: Q = {}\n'.format(Q))
+
+
+def main(context):
+    n = int(context.number)
+    m = int(context.base)
+
+    attack = Attack(n, m, on_done=report, on_iter=iter)
+    attack.start()
 
 
 if __name__ == '__main__':

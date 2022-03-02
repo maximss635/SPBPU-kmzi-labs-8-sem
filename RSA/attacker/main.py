@@ -3,6 +3,7 @@ import random
 import rsa.common
 import rsa.prime
 import argparse
+from time import time
 from attacks import *
 
 
@@ -129,29 +130,45 @@ def try_attack_4():
 
 
 def generate(bits):
+    time_start = time()
+    bits >>= 1
+
     left = 1 << (bits - 1)
     right = (1 << bits) - 1
 
     # generate p
+    p = random.randint(left, right)
     while True:
-        p = random.randint(left, right)
         if rsa.prime.is_prime(p):
             break
+        p += 1
+    while True:
+        if rsa.prime.is_prime(p) and rsa.prime.is_prime(2 * p + 1):
+            break
+        p += 2
 
     sqrt_p = math.sqrt(p)
     p = 2 * p + 1
     print('p = {}'.format(p))
 
     # generate q
+    q = random.randint(left, right)
     while True:
-        q = random.randint(left, right)
-        if rsa.prime.is_prime(q) and p != q:
+        if rsa.prime.is_prime(q):
             break
+        q += 1
+    while True:
+        if p != q and rsa.prime.is_prime(q) and rsa.prime.is_prime(2 * q + 1):
+            break
+        q += 2
 
-    print('q = {}'.format(q))
-
+    # q - prime
     sqrt_q = math.sqrt(q)
     q = 2 * q + 1
+    print('q = {}'.format(q))
+
+    assert rsa.prime.is_prime(p)
+    assert rsa.prime.is_prime(q)
 
     n = p * q
     f_n = (p - 1) * (q - 1)
@@ -173,6 +190,9 @@ def generate(bits):
 
     print('e = {}'.format(e))
     print('d = {}'.format(d))
+    print('log(n) = {}'.format(math.log2(n)))
+
+    print('Время: {}'.format(time() - time_start))
 
 
 if __name__ == '__main__':

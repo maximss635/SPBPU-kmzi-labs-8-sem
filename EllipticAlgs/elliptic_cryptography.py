@@ -44,16 +44,7 @@ class EllipticCurvePoint:
         y = (self.y + m * (x - self.x)) % self.__curve.n
         y = (-y) % self.__curve.n
 
-        result = EllipticCurvePoint(x, y, self.__curve)
-
-        # try:
-        #     result.check_curve_exist()
-        # except AssertionError:
-        #     print(self, other, result)
-        #
-        # result.check_curve_exist()
-
-        return result
+        return EllipticCurvePoint(x, y, self.__curve).check_curve_exist()
 
     def __mul__(self, n: int):
         """
@@ -69,19 +60,16 @@ class EllipticCurvePoint:
                     result = addend.clone()
                 else:
                     result += addend
-                    result.check_curve_exist()
             addend = addend + addend
-            addend.check_curve_exist()
 
-        result.check_curve_exist()
-
-        return result
+        return result.check_curve_exist()
 
     def check_curve_exist(self):
-        if pow(self.y, 2, self.__curve.n) != \
-               (pow(self.x, 3, self.__curve.n) + self.__curve.a * self.x + self.__curve.b) % self.__curve.n:
+        # if pow(self.y, 2, self.__curve.n) != \
+               # (pow(self.x, 3, self.__curve.n) + self.__curve.a * self.x + self.__curve.b) % self.__curve.n:
             # print('[WARNING] {} не лежит на кривой {}'.format(self, self.__curve))
-            pass
+            # pass
+        return self
 
     def show(self):
         self.__curve.show(self)
@@ -96,9 +84,9 @@ class EllipticCurve:
     def __str__(self):
         return 'y^2 = x^3 {} {}x {} {} (mod {})'.format(
             '+' if self.a >= 0 else '-',
-            math.fabs(self.a),
+            self.a,
             '+' if self.b >= 0 else '-',
-            math.fabs(self.b),
+            self.b,
             self.n)
 
     def __call__(self, x):
