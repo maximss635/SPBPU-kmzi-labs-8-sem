@@ -51,18 +51,17 @@ class EllipticCurvePoint:
         Возвращает результат n * self, вычисленный
         алгоритмом удвоения-сложения.
         """
-        result = None
-        addend = self
+        Q, P = None, self.clone()
 
         for bit in bits(n):
             if bit == 1:
-                if result is None:
-                    result = addend.clone()
+                if Q is None:
+                    Q = P
                 else:
-                    result += addend
-            addend = addend + addend
+                    Q += P
+            P = P + P
 
-        return result.check_curve_exist()
+        return Q.check_curve_exist()
 
     def check_curve_exist(self):
         # if pow(self.y, 2, self.__curve.n) != \
