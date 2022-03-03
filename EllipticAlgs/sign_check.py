@@ -49,20 +49,31 @@ def sign_check(path, sign, Q, sign_params):
     return r == R
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--path', required=True)
-    parser.add_argument('--x', required=True)
-    parser.add_argument('--y', required=True)
-    parser.add_argument('--sign', required=True)
-
-    context = parser.parse_args()
-
+def main(context):
     sign_params = SignParams()
     Q = EllipticCurvePoint(int(context.x), int(context.y), sign_params.curve)
 
-    check = sign_check(context.path, int(context.sign), Q, sign_params)
+    f = open(context.path_sign, 'rb')
+    sign = f.read(64)
+    f.close()
+
+    sign = int.from_bytes(sign, byteorder='big')
+    print('Подпись: {}'.format(hex(sign)))
+    print('Открытый ключ: {}'.format(Q))
+
+    check = sign_check(context.path_file, sign, Q, sign_params)
     if check:
         print('Подпись верная!')
     else:
         print('Подпись неверная!')
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--path-file', required=True)
+    parser.add_argument('--x', required=True)
+    parser.add_argument('--y', required=True)
+    parser.add_argument('--path-sign', required=True)
+
+    main(parser.parse_args())
+

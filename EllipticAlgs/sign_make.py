@@ -1,4 +1,4 @@
-from elliptic_cryptography import *
+from sign_check import *
 from sign_params import *
 
 from Crypto.Hash import SHA256
@@ -43,17 +43,28 @@ def sign_file(path, d, sign_params):
     return r << 256 | s
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--path', required=True)
-    parser.add_argument('--d', required=True)
-
-    context = parser.parse_args()
-
+def main(context):
     d = int(context.d)
     sign_params = SignParams()
 
-    sign = sign_file(context.path, d, sign_params)
+    sign = sign_file(context.path_file, d, sign_params)
 
-    print('Подпись: {}'.format(sign))
-    print('Открытый ключ: {}'.format(sign_params.P * d))
+    path_sign = context.path_file + '.sign'
+    f = open(path_sign, 'wb')
+    f.write(sign.to_bytes(byteorder='big', length=64))
+    f.close()
+
+    Q = sign_params.P * d
+
+    print('Подпись: {}'.format(path_sign))
+    print('Открытый ключ (для проверки): {}'.format(Q))
+
+    assert sign_check(context.path_file, sign, Q, sign_params)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--path-file', required=True)
+    parser.add_argument('--d', required=True)
+
+    main(parser.parse_args())
