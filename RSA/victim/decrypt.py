@@ -4,6 +4,9 @@ from common import *
 def main(context):
     data = from_file(context.path_in, os.path.getsize(context.path_in))
     cipher_key, cipher_text = parse_header(data)
+
+    # print('Шифртекст {}'.format(cipher_text))
+
     # cipher_key = int.from_bytes(cipher_key, byteorder='big')
 
     d, n = parse_rsa_key(context.rsa_key, is_public=False)

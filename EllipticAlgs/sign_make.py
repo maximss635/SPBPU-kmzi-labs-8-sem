@@ -1,5 +1,3 @@
-import asn1
-
 from sign_check import *
 
 
@@ -23,7 +21,7 @@ def sign_file(path, d, sign_params):
     hash_instance = SHA256.new(data)
     h = hash_instance.digest()
     h = int.from_bytes(h, byteorder='big')
-    # print('h = {}'.format(hex(h)))
+    print('Хэщ образ: {}'.format(hex(h)))
 
     e = h % sign_params.q
     if e == 0:
@@ -108,18 +106,18 @@ def main(context):
 
     sign = sign_file(context.path_file, d, sign_params)
 
-    path_sign = context.path_file + '.sign'
     Q = sign_params.P * d
 
-    write_sign_file(path_sign, sign, Q, sign_params)
+    write_sign_file(context.path_sign, sign, Q, sign_params)
 
-    print('Файл {} подписан: {}'.format(context.path_file, path_sign))
+    print('Файл {} подписан: {}'.format(context.path_file, context.path_sign))
     # assert sign_check(context.path_file, sign, Q, sign_params)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--path-file', required=True)
+    parser.add_argument('--path-sign', required=True)
     parser.add_argument('--d', required=True)
 
     main(parser.parse_args())

@@ -56,24 +56,34 @@ def parse_header(data):
 
     decoder.peek()
     decoder.enter()
+
     decoder.peek()
     decoder.enter()
+
     decoder.peek()
     decoder.enter()
+
     decoder.peek()
     decoder.read()
     decoder.read()
+
+    decoder.enter()
+    _, n = decoder.read()
+    _, e = decoder.read()
+    decoder.leave()
+
     decoder.enter()
     _, cipher_key = decoder.read()
+    decoder.leave()
 
-    return cipher_key, data[160:]
+    decoder.leave()
+    decoder.leave()
+    decoder.leave()
+
+    return cipher_key, data[303:]
 
 
-def make_header(cipher_key):
-    # l, type = RSA_KEY_LEN // 8, 31
-    # header = type.to_bytes(1, 'big') + l.to_bytes(1, 'big') + cipher_key
-
-    key_len = RSA_KEY_LEN // 8
+def make_header(cipher_key, e, n):
     cipher_key = int.from_bytes(cipher_key, byteorder='big')
 
     encoder = asn1.Encoder()
@@ -84,6 +94,12 @@ def make_header(cipher_key):
     encoder.enter(asn1.Numbers.Sequence)
     encoder.write(b'\x00\x01', asn1.Numbers.OctetString)   # RSA
     encoder.write(b'Data', asn1.Numbers.UTF8String)
+
+    encoder.enter(asn1.Numbers.Sequence)
+    encoder.write(n, asn1.Numbers.Integer)
+    encoder.write(e, asn1.Numbers.Integer)
+    encoder.leave()
+
     encoder.enter(asn1.Numbers.Sequence)
     encoder.write(cipher_key, asn1.Numbers.Integer)
     encoder.leave()

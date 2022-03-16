@@ -18,10 +18,10 @@ def main(context):
     e, n = parse_rsa_key(context.rsa_key, is_public=True)
 
     cipher_key = pow(key, e, n)
-    print('Зашифрованный ключ: {}'.format(hex(cipher_key)))
+    # print('Зашифрованный ключ: {}'.format(hex(cipher_key)))
     cipher_key = cipher_key.to_bytes(RSA_KEY_LEN//8, byteorder='big')
 
-    header = make_header(cipher_key)
+    header = make_header(cipher_key, e, n)
 
     print('Header: {} bytes'.format(len(header)))
 
@@ -30,6 +30,8 @@ def main(context):
     f.write(header)
     f.write(cipher_text)
     f.close()
+
+    # print('Шифртекст {}'.format(cipher_text))
 
     print('Файл с шифртекстом: {}'.format(path_out))
     print('{} bytes -> {} bytes'.format(open_text_len, len(cipher_text) + len(header)))
