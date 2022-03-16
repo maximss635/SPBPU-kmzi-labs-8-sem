@@ -96,14 +96,14 @@ EllipticAlgs/
 
 открываем sign_make.py находим класс SignParams пишем туда параметры из своего варианта
 
-python sign_make.py --path-file res/test.docx --d *закрытый ключ например 5719*
+python sign_make.py --path-file res/test.docx --path-sign res/sign.hex --d *закрытый ключ например 5719*
 
-появится подпись файла res/test.docx.sign
+появится подпись файла res/sign.hex
 
 ее можно красиво посмотреть утилитой
-dumpasn1 res/test.docx.sign
+dumpasn1 res/sign.hex
 
 проверка подписи
-python sign_check.py --path-file res/test.docx --path-sign res/test.docx.sign
+**python sign_check.py --path-file res/test.docx --path-sign res/sign.hex**
 
 должна быть надпись что подпись верная

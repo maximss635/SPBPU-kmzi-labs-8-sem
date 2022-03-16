@@ -21,7 +21,7 @@ def sign_file(path, d, sign_params):
     hash_instance = SHA256.new(data)
     h = hash_instance.digest()
     h = int.from_bytes(h, byteorder='big')
-    print('Хэщ образ: {}'.format(hex(h)))
+    print('Хэш образ: {}'.format(hex(h)))
 
     e = h % sign_params.q
     if e == 0:
@@ -43,8 +43,8 @@ def sign_file(path, d, sign_params):
 
         break
 
-    # print('r = {}'.format(hex(r)))
-    # print('s = {}'.format(hex(s)))
+    print('r = {}'.format(hex(r)))
+    print('s = {}'.format(hex(s)))
 
     return r << 256 | s
 
@@ -82,8 +82,8 @@ def write_sign_file(path_sign, sign, Q, sign_params):
 
     encoder.write(sign_params.q, asn1.Numbers.Integer)
 
-    r = sign & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-    s = sign >> 256
+    s = sign & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    r = sign >> 256
 
     encoder.enter(asn1.Numbers.Sequence)
     encoder.write(r, asn1.Numbers.Integer)
@@ -100,6 +100,15 @@ def write_sign_file(path_sign, sign, Q, sign_params):
     f.close()
 
 
+def save_open_key(Q, path):
+    f = open(path, 'w')
+    f.write('Qx = {}\n'.format(Q.x))
+    f.write('Qy = {}\n'.format(Q.y))
+    f.close()
+
+    print('Открытый ключ сохранен: {}'.format(path))
+
+
 def main(context):
     d = int(context.d)
     sign_params = SignParams()
@@ -111,7 +120,9 @@ def main(context):
     write_sign_file(context.path_sign, sign, Q, sign_params)
 
     print('Файл {} подписан: {}'.format(context.path_file, context.path_sign))
-    # assert sign_check(context.path_file, sign, Q, sign_params)
+    assert sign_check(context.path_file, sign, Q, sign_params, logs=False)
+
+    save_open_key(Q, context.path_open_key)
 
 
 if __name__ == '__main__':
@@ -119,5 +130,6 @@ if __name__ == '__main__':
     parser.add_argument('--path-file', required=True)
     parser.add_argument('--path-sign', required=True)
     parser.add_argument('--d', required=True)
+    parser.add_argument('--path-open-key', required=True)
 
     main(parser.parse_args())

@@ -92,14 +92,16 @@ def parse_sign_file(path_sign):
     return sign_params, Q, sign
 
 
-def sign_check(path_file, sign, Q, sign_params):
-    print('Проверка:  {}'.format(path_file))
+def sign_check(path_file, sign, Q, sign_params, logs=True):
+    if logs:
+        print('Проверка:  {}'.format(path_file))
 
-    r = sign & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-    s = sign >> 256
+    s = sign & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    r = sign >> 256
 
-    # print('s = {}'.format(hex(s)))
-    # print('r = {}'.format(hex(r)))
+    if logs:
+        print('s = {}'.format(hex(s)))
+        print('r = {}'.format(hex(r)))
 
     check = (0 < r < sign_params.q)
     check &= (0 < s < sign_params.q)
@@ -138,9 +140,23 @@ def sign_check(path_file, sign, Q, sign_params):
     return r == R
 
 
+def parse_open_key_file(path):
+    print('Чтение ключа: {}'.format(path))
+
+    f = open(path, 'r')
+    x = f.readline()
+    y = f.readline()
+    f.close()
+
+    return int(x.replace('Qx = ', '')), int(y.replace('Qy = ', ''))
+
+
 def main(context):
     print('Чтение подписи: {}'.format(context.path_sign))
-    sign_params, Q, sign = parse_sign_file(context.path_sign)
+    sign_params, _, sign = parse_sign_file(context.path_sign)
+
+    qx, qy = parse_open_key_file(context.path_open_key)
+    Q = EllipticCurvePoint(qx, qy, sign_params.curve)
 
     check = sign_check(context.path_file, sign, Q, sign_params)
     if check:
@@ -153,6 +169,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--path-file', required=True)
     parser.add_argument('--path-sign', required=True)
+    parser.add_argument('--path-open-key', required=True)
 
     main(parser.parse_args())
 
