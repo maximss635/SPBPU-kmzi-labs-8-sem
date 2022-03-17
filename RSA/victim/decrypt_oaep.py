@@ -43,7 +43,7 @@ def decrypt_key(cipher_key, d, n):
 def main(context):
     data = from_file(context.path_in, os.path.getsize(context.path_in))
     cipher_key, cipher_text = parse_header(data)
-    cipher_key = int.from_bytes(cipher_key, byteorder='big')
+    # cipher_key = int.from_bytes(cipher_key, byteorder='big')
 
     d, n = parse_rsa_key(context.rsa_key, is_public=False)
     key = decrypt_key(cipher_key, d, n)

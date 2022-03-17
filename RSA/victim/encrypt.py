@@ -21,7 +21,7 @@ def main(context):
     # print('Зашифрованный ключ: {}'.format(hex(cipher_key)))
     cipher_key = cipher_key.to_bytes(RSA_KEY_LEN//8, byteorder='big')
 
-    header = make_header(cipher_key, e, n)
+    header = make_header(cipher_key, e, n, len(cipher_text))
 
     print('Header: {} bytes'.format(len(header)))
 

@@ -58,14 +58,12 @@ def main(context):
     e, n = parse_rsa_key(context.rsa_key, is_public=True)
 
     cipher_key = crypt_key(key, e, n)
-    cipher_key = cipher_key.to_bytes(RSA_KEY_LEN//8, byteorder='big')
 
-    l, type = RSA_KEY_LEN // 8, 31
-    header = type.to_bytes(1, 'big') + l.to_bytes(1, 'big') + cipher_key
+    header = make_header(cipher_key, e, n, len(cipher_text))
 
     print('Header: {} bytes'.format(len(header)))
 
-    path_out = context.path_in + '.crypted'
+    path_out = context.path_in + '.encrypted'
     f = open(path_out, 'wb')
     f.write(header)
     f.write(cipher_text)

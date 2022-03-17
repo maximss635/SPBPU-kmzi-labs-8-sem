@@ -80,11 +80,12 @@ def parse_header(data):
     decoder.leave()
     decoder.leave()
 
-    return cipher_key, data[303:]
+    return cipher_key, data[306:]
 
 
-def make_header(cipher_key, e, n):
-    cipher_key = int.from_bytes(cipher_key, byteorder='big')
+def make_header(cipher_key, e, n, len_cipher_text):
+    if type(cipher_key) != int:
+        cipher_key = int.from_bytes(cipher_key, byteorder='big')
 
     encoder = asn1.Encoder()
     encoder.start()
@@ -106,7 +107,7 @@ def make_header(cipher_key, e, n):
     encoder.leave()
     encoder.leave()
     encoder.write(b'\x01\x32', asn1.Numbers.OctetString)    # 3DES
-    encoder.write(AES.block_size, asn1.Numbers.Integer)
+    encoder.write(len_cipher_text, asn1.Numbers.Integer)
     encoder.leave()
 
     header = encoder.output()
